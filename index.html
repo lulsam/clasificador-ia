@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clasificador IA</title>
+    <script src="https://microsoft.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; margin: 0; background-color: #f3f2f1; color: #323130; }
+        .title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #106ebe; }
+        .btn { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background-color: #ffffff; color: #323130; border: 1px solid #8a8886; border-radius: 4px; text-align: left; font-size: 14px; cursor: pointer; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; }
+        .btn:hover { background-color: #edebe9; border-color: #0078d4; color: #0078d4; }
+        .btn-rec { border-left: 5px solid #106ebe; font-weight: 600; }
+        #loading { font-size: 14px; color: #605e5c; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="title">🤖 Sugerencias de Copilot</div>
+    <div id="loading">Analizando correo y buscando rutas...</div>
+    <div id="buttons-container" style="display:none;"></div>
+
+    <script>
+        Office.onReady(function (info) {
+            if (info.host === Office.HostType.Outlook) {
+                const item = Office.context.mailbox.item;
+                
+                // Leemos los datos del email que tienes abierto en pantalla
+                item.body.getAsync(Office.CoercionType.Text, function (result) {
+                    const emailData = {
+                        subject: item.subject,
+                        from: item.from.emailAddress,
+                        text: result.value
+                    };
+
+                    // ENVIAR DATOS A TU N8N LOCAL EN SEGUNDO PLANO
+                    fetch('http://localhost:5678/webhook/clasificar-correo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(emailData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('loading').style.display = 'none';
+                        const container = document.getElementById('buttons-container');
+                        container.style.display = 'block';
+                        container.innerHTML = '';
+
+                        // Pintamos físicamente los 4 botones basados en la IA de Groq
+                        if(data.recommended_AI) crearBoton(data.recommended_AI, true);
+                        if(data.alt1) crearBoton(data.alt1, false);
+                        if(data.alt2) crearBoton(data.alt2, false);
+                        if(data.alt3) crearBoton(data.alt3, false);
+                    });
+                });
+            }
+        });
+
+        function crearBoton(folderPath, isRecommended) {
+            const btn = document.createElement('button');
+            btn.className = 'btn' + (isRecommended ? ' btn-rec' : '');
+            btn.innerText = (isRecommended ? '📌 ' : '📂 ') + folderPath;
+            
+            // ACCIÓN DE 1 CLIC: Mover al pulsar el botón
+            btn.onclick = function() {
+                btn.innerText = "⏳ Moviendo...";
+                btn.disabled = true;
+                
+                // Mandamos la orden a n8n para que arrastre el correo físicamente
+                fetch('http://localhost:5678/webhook/clasificar-correo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'move', folder: folderPath, messageId: Office.context.mailbox.item.itemId })
+                }).then(() => {
+                    Office.context.ui.closeContainer(); // Cierra el panel lateral solo al terminar
+                });
+            };
+            document.getElementById('buttons-container').appendChild(btn);
+        }
+    </script>
+</body>
+</html>
