@@ -1,0 +1,83 @@
+<OfficeApp xmlns="http://microsoft.com" xmlns:xsi="http://w3.org" xmlns:bt="http://microsoft.com" xsi:type="MailApp">
+  <Id>d86fcf6b-c545-461c-a8ea-c640087fafb7</Id>
+  <Version>1.0.0.3</Version>
+  <ProviderName>MiClasificadorNube</ProviderName>
+  <DefaultLocale>es-ES</DefaultLocale>
+  <DisplayName DefaultValue="Clasificador IA"/>
+  <Description DefaultValue="Clasifica emails con IA"/>
+  
+  <!-- Direcciones principales apuntando a tu GitHub Pages -->
+  <IconUrl DefaultValue="https://github.io"/>
+  <HighResolutionIconUrl DefaultValue="https://github.io"/>
+  <SupportUrl DefaultValue="https://github.io"/>
+  
+  <AppDomains>
+    <AppDomain>https://lulsam.github.io</AppDomain>
+  </AppDomains>
+  
+  <Hosts>
+    <Host Name="Mailbox"/>
+  </Hosts>
+  
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.5"/>
+    </Sets>
+  </Requirements>
+  
+  <Permissions>ReadWriteMailbox</Permissions>
+  
+  <!-- ACTIVACIÓN SIMPLE -->
+  <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
+  
+  <!-- VERSIONOVERRIDES PARA EL BOTÓN EN LA BARRA DE OUTLOOK -->
+  <VersionOverrides xmlns="http://microsoft.com" xsi:type="VersionOverridesV1_1">
+    <Hosts>
+      <Host xsi:type="MailHost">
+        <DesktopFormFactor>
+          <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="grp1">
+                <Label resid="labelGroup"/>
+                <Control xsi:type="Button" id="btnOpen">
+                  <Label resid="labelButton"/>
+                  <Supertip>
+                    <Title resid="labelButton"/>
+                    <Description resid="labelDesc"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="icon16"/>
+                    <bt:Image size="32" resid="icon32"/>
+                    <bt:Image size="80" resid="icon80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="urlTaskpane"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    
+    <Resources>
+      <bt:Images>
+        <bt:Image id="icon16" DefaultValue="https://github.ioassets/icon-16.png"/>
+        <bt:Image id="icon32" DefaultValue="https://github.ioassets/icon-32.png"/>
+        <bt:Image id="icon80" DefaultValue="https://github.ioassets/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <!-- Tu archivo HTML cargado de forma segura -->
+        <bt:Url id="urlTaskpane" DefaultValue="https://github.ioindex.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="labelGroup" DefaultValue="IA"/>
+        <bt:String id="labelButton" DefaultValue="Clasificar"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="labelDesc" DefaultValue="Abrir clasificador IA"/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
